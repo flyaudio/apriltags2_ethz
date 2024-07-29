@@ -1,3 +1,4 @@
+"""@usage: sudo python setup.py install"""
 import os
 import re
 import sys
@@ -12,7 +13,7 @@ from distutils.version import LooseVersion
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
-        self.sourcedir = os.path.abspath(sourcedir)
+        self.sourcedir = os.path.abspath(sourcedir) #指定扩展模块的源目录
 
 
 class CMakeBuild(build_ext):
@@ -34,7 +35,8 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+                      '-DPYTHON_EXECUTABLE=' + sys.executable,
+                      '-DCMAKE_CXX_FLAGS_RELEASE=-O3',]  # Add this line to set -O3 for Release builds
 
         cfg = 'Debug' if self.debug else 'Release'
         build_args = ['--config', cfg]
@@ -49,8 +51,8 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j2']
 
         env = os.environ.copy()
-        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
-                                                              self.distribution.get_version())
+        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\" -O3'.format(env.get('CXXFLAGS', ''),
+                                                                 self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
@@ -74,9 +76,7 @@ setup(
     author='Jariullah Safi',
     author_email='safijari@isu.edu',
     ext_modules=[CMakeExtension('cmake_example')],
-    install_requires=['pybind11>=2.2',
-                      'numpy',
-                      'opencv-python'],
+    install_requires=['pybind11>=2.2'],
     packages=['aprilgrid'],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

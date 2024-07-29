@@ -36,18 +36,24 @@ using namespace std;
 namespace AprilTags {
 
   std::vector<TagDetection> TagDetector::extractTags(const cv::Mat& image) {
-
     // convert to internal AprilTags image (todo: slow, change internally to OpenCV)
     int width = image.cols;
     int height = image.rows;
     AprilTags::FloatImage fimOrig(width, height);
     int i = 0;
-    for (int y=0; y<height; y++) {
-      for (int x=0; x<width; x++) {
-        fimOrig.set(x, y, image.data[i]/255.);
-        i++;
+    for (int y=0; y<height; ++y) {
+      int r_idx = y*width;
+      for (int x=0; x<width; ++x) {
+        // fimOrig.set(x, y, image.data[i]/255.);
+        fimOrig.pixels[r_idx + x] = image.data[i]/255.;
+        ++i;
       }
     }
+  ////////////////////////////////
+    // cv::Mat img_tmp;
+    // image.convertTo(img_tmp, CV_32F, 1./255.);
+    // fimOrig.pixels = img_tmp.reshape(1,1);
+  ////////////////////////////////
     std::pair<int,int> opticalCenter(width/2, height/2);
 
 #ifdef DEBUG_APRIL

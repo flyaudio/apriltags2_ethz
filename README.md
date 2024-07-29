@@ -22,3 +22,11 @@ id: the id/number of the tag
 good: if the detection was high confidence
 corners: an array of 4 corners, each corner represented by a tuple e.g. [(x1, y1), (x2, y2) ...]
 ```
+
+# How to use
+git clone --recursive THIS_REPO
+fix some python2 print() to python3 in apriltags2_ethz/aprilgrid/createTargetPDF.py
+cd apriltags2_ethz
+sudo python3 setup.py install
+# Test
+run test.py
